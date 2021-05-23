@@ -1,0 +1,55 @@
+server:
+  port: 2001
+app:
+  id: demo
+apollo:
+  meta: http://localhost:8070
+  bootstrap:
+    enabled: true
+    namespace: application
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            exposedHeaders:
+              - content-type
+            allowedHeaders:
+              - content-type
+            allowedMethod:
+              - GET
+              - OPTIONS
+              - PUT
+              - DELETE
+              - POST
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: path_route
+          uri: http://cxytiandi.com
+          predicates:
+            - Path=/course,/blog/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+        - id: customer_route
+          uri: http://cxytiandi.com
+          predicates:
+            - name: CheckAuth
+              args:
+                name: demo
+        - id: user-service
+          uri: lb:user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - name: Hystrix
+              args:
+                name: fallbackcmd
+                fallbackUri: forward:/callback
+
